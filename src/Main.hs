@@ -9,11 +9,15 @@ import           Control.Applicative
 import           Control.Monad.Trans.Either
 import           Control.Monad.IO.Class
 import           Control.Exception          ( catch, SomeException )
+import           Data.List                  ( intercalate )
+import           Data.Maybe                 ( fromMaybe )
 import qualified Data.Text                  as T
 import           Data.Text.IO               ( readFile, writeFile )
 import           Network.Wai
 import           Network.Wai.Handler.Warp
 import           Servant
+import           System.Environment         ( getArgs, getProgName )
+import           System.Exit                ( exitFailure )
 import           System.FilePath.Posix      ( (</>) )
 
 type TextFile = T.Text
@@ -53,6 +57,17 @@ down db path = do
 up :: BaseDirPath -> FilePath -> T.Text -> EitherT ServantErr IO ()
 up db path content = liftIO $ writeFile (db </> path) content
 
-app = serve tputAPI (server defaultServerConf)
+app conf = serve tputAPI (server $ fromMaybe defaultServerConf conf)
 
-main = run 8080 app
+main = do
+    args <- getArgs
+    progName <- getProgName
+
+    if null args
+        then do
+            putStrLn $ intercalate " " [ "usage:", progName, "UPLOAD_DIR" ]
+            exitFailure
+        else do
+            let basedir = head args
+            putStrLn $ concat [ "Running on port 8080 from ", basedir, "..." ]
+            run 8080 $ app (Just ServerConf { basedir = basedir })
