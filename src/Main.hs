@@ -20,19 +20,15 @@ import           System.Environment         ( getArgs, getProgName )
 import           System.Exit                ( exitFailure )
 import           System.FilePath.Posix      ( (</>) )
 
-type TextFile = T.Text
-
 type TPutAPI = "files"
                    :> Capture "path" FilePath
-                   :> Get '[PlainText] TextFile
+                   :> Get '[PlainText] T.Text
           :<|> "files"
                    :> Capture "path" FilePath
                    :> ReqBody '[PlainText] T.Text
                    :> Post '[PlainText] ()
 
-type BaseDirPath = FilePath
-
-data ServerConf = ServerConf { basedir :: BaseDirPath
+data ServerConf = ServerConf { basedir :: FilePath
                              }
 
 defaultServerConf = ServerConf { basedir = "data"
@@ -45,7 +41,7 @@ server :: ServerConf -> Server TPutAPI
 server conf = down (basedir conf)
          :<|> up (basedir conf)
 
-down :: BaseDirPath -> FilePath -> EitherT ServantErr IO T.Text
+down :: FilePath -> FilePath -> EitherT ServantErr IO T.Text
 down db path = do
     text <- liftIO $ (readFile (db </> path) >>= return . Just) `catch` fail
     case text of
@@ -54,7 +50,7 @@ down db path = do
     where fail :: SomeException -> IO (Maybe T.Text)
           fail = const (return Nothing)
 
-up :: BaseDirPath -> FilePath -> T.Text -> EitherT ServantErr IO ()
+up :: FilePath -> FilePath -> T.Text -> EitherT ServantErr IO ()
 up db path content = liftIO $ writeFile (db </> path) content
 
 app conf = serve tputAPI (server $ fromMaybe defaultServerConf conf)
