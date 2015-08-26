@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Main where
 
 import Server
@@ -23,4 +25,5 @@ main = do
         else do
             let basedir = head args
             putStrLn $ concat [ "Running on port 8080 from ", basedir, "..." ]
-            run 8080 $ app (Just ServerConf { basedir = basedir })
+            let settings = setPort 8080 $ setHost "127.0.0.1" defaultSettings
+            runSettings settings $ app (Just ServerConf { basedir = basedir })
