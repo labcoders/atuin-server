@@ -1,22 +1,20 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE TypeOperators #-}
 
 module Main where
 
-import Prelude hiding ( readFile, writeFile )
-import GHC.Generics
-import Network.Wai
-import Network.Wai.Handler.Warp
-import Servant
-import qualified Data.Text as T
-import Data.Text.IO ( readFile, writeFile )
-import Control.Applicative
-import Control.Monad.Trans.Either
-import Control.Monad.IO.Class
-import Control.Exception ( catch, SomeException )
-import System.FilePath.Posix ( (</>) )
+import           Prelude                    hiding ( readFile, writeFile )
+
+import           Control.Applicative
+import           Control.Monad.Trans.Either
+import           Control.Monad.IO.Class
+import           Control.Exception          ( catch, SomeException )
+import qualified Data.Text                  as T
+import           Data.Text.IO               ( readFile, writeFile )
+import           Network.Wai
+import           Network.Wai.Handler.Warp
+import           Servant
+import           System.FilePath.Posix      ( (</>) )
 
 type TextFile = T.Text
 
