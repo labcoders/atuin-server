@@ -38,11 +38,13 @@ If you don't like this:
 Usage
 =====
 
-Two endpoints become available:
+These are the available endpoints.
 
 * `GET /files/<filename>` retrieves the contents of _filename_ or 404s.
 * `POST /files/<filename>` creates or overwrites the contents of _filename_
   with the request body.
+* `GET /list` retrieves a list of files stored on the server with one file name
+  per line.
 
 Servant will automatically deal with issues like malicious users injecting dots
 or slashes into the URL.
