@@ -14,6 +14,7 @@ import           Control.Applicative
 import           Control.Monad.Trans.Either
 import           Control.Monad.IO.Class
 import           Control.Exception          ( catch, SomeException )
+import           Data.List                  ( sort )
 import qualified Data.Text                  as T
 import           Data.Text.IO               ( readFile, writeFile )
 import           Servant
@@ -58,5 +59,5 @@ up db path content = liftIO $ writeFile (db </> path) content
 
 ls :: FilePath -> EitherT ServantErr IO T.Text
 ls db = do
-    files <- liftIO $ filter (\(c:_) -> c /= '.') <$> getDirectoryContents db
+    files <- liftIO $ sort . filter (\(c:_) -> c /= '.') <$> getDirectoryContents db
     pure $ T.pack $ unlines files
