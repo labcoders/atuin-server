@@ -2,7 +2,7 @@
 
 module Main where
 
-import Server
+import Atuin.Server
 
 import Data.List                ( intercalate )
 import qualified Data.Map.Strict as Map
