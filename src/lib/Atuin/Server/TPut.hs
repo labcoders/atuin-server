@@ -25,12 +25,12 @@ down
   -> EitherT ServantErr IO T.Text
 down db path = do
     liftIO $ putStrLn "download"
-    text <- liftIO $ (readFile (db </> path) >>= return . Just) `catch` fail
+    text <- liftIO $ (readFile (db </> path) >>= return . Just) `catch` handle
     case text of
         Nothing -> left err404
         Just t -> return t
-    where fail :: SomeException -> IO (Maybe T.Text)
-          fail = const (return Nothing)
+    where handle :: SomeException -> IO (Maybe T.Text)
+          handle = const (return Nothing)
 
 -- | Uploads a file.
 up

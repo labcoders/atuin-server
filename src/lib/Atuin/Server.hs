@@ -13,17 +13,11 @@ import Atuin.Server.Messaging ( send, recv )
 import Atuin.Server.TPut ( down, up, ls )
 import Atuin.Types
 
-import Control.Applicative
 import Control.Concurrent.MVar
 import Control.Monad.Trans.Either
-import Control.Monad.IO.Class
-import Control.Exception ( catch, SomeException )
-import Data.List ( sort )
 import qualified Data.Text as T
 import qualified Data.Map.Strict as Map
 import Servant
-import System.FilePath.Posix ( (</>) )
-import System.Directory ( getDirectoryContents )
 
 type TPutAPI
   = "files"
@@ -82,4 +76,4 @@ server conf
 --
 -- /Unimplemented:/ will crash if used.
 blockdata :: FilePath -> T.Text -> EitherT ServantErr IO ()
-blockdata dir contents = error "unimplemented blockdata route" -- todo
+blockdata = error "unimplemented blockdata route" -- todo

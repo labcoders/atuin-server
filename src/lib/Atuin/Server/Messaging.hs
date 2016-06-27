@@ -15,7 +15,6 @@ import Control.Monad.Trans.Either
 import Control.Concurrent.MVar
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
-import Data.Text.IO ( readFile, writeFile )
 import Servant
 
 -- | Poll for a message on the queue identified with a given 'ComputerID'.
@@ -25,18 +24,18 @@ recv
   -- | Name of the queue to read from
   -> ComputerID
   -> EitherT ServantErr IO Message
-recv mv id = do
+recv mv cid = do
   msgs <- liftIO $ takeMVar mv
-  case Map.lookup id msgs of
+  case Map.lookup cid msgs of
     Just a -> case a of
       [] -> liftIO $ putMVar mv msgs >> return ""
-      (x:xs) -> do
-          let newMsgs = Map.adjust tail id msgs
+      (x:_) -> do
+          let newMsgs = Map.adjust tail cid msgs
           liftIO $ putMVar mv newMsgs
-          liftIO $ putStrLn $ T.unpack id ++ " -> # = " ++ T.unpack x
+          liftIO $ putStrLn $ T.unpack cid ++ " -> # = " ++ T.unpack x
           return x
     Nothing -> liftIO $ do
-      putStrLn $ "no messages for " ++ show id
+      putStrLn $ "no messages for " ++ show cid
       putMVar mv msgs >> return ""
 
 -- | Record a message destinted for a given 'ComputerID'.
@@ -48,9 +47,9 @@ send
   -- | Message to record
   -> Message
   -> EitherT ServantErr IO ()
-send mv id msg = do
-    liftIO $ putStrLn $ "# -> " ++ T.unpack id ++ " = " ++ T.unpack msg
+send mv cid msg = do
+    liftIO $ putStrLn $ "# -> " ++ T.unpack cid ++ " = " ++ T.unpack msg
     msgs <- liftIO $ takeMVar mv
-    liftIO $ putMVar mv $ case Map.lookup id msgs of
-        Nothing -> Map.insert id [msg] msgs
-        Just oldMsgs -> Map.insert id (oldMsgs ++ [msg]) msgs
+    liftIO $ putMVar mv $ case Map.lookup cid msgs of
+        Nothing -> Map.insert cid [msg] msgs
+        Just oldMsgs -> Map.insert cid (oldMsgs ++ [msg]) msgs
