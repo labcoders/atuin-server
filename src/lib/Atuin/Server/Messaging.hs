@@ -10,8 +10,7 @@ import Prelude hiding ( readFile, writeFile )
 
 import Atuin.Types
 
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Either
+import Control.Monad.Except
 import Control.Concurrent.MVar
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
@@ -23,7 +22,7 @@ recv
   :: MVar (Map.Map ComputerID [Message])
   -- | Name of the queue to read from
   -> ComputerID
-  -> EitherT ServantErr IO Message
+  -> Handler Message
 recv mv cid = do
   msgs <- liftIO $ takeMVar mv
   case Map.lookup cid msgs of
@@ -46,10 +45,11 @@ send
   -> ComputerID
   -- | Message to record
   -> Message
-  -> EitherT ServantErr IO ()
+  -> Handler NoContent
 send mv cid msg = do
     liftIO $ putStrLn $ "# -> " ++ T.unpack cid ++ " = " ++ T.unpack msg
     msgs <- liftIO $ takeMVar mv
     liftIO $ putMVar mv $ case Map.lookup cid msgs of
         Nothing -> Map.insert cid [msg] msgs
         Just oldMsgs -> Map.insert cid (oldMsgs ++ [msg]) msgs
+    pure NoContent

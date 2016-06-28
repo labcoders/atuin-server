@@ -21,16 +21,17 @@ library
   ghc-options: -Wall
   build-depends:
     base >=4.7 && <4.9,
-    wai >=3.0 && <4.0,
-    warp >=3.0 && <4.0,
-    servant-server >=0.4 && <0.5,
-    text >=1.0 && <2.0,
-    either >=4.0 && <5.0,
-    transformers >=0.4 && <1.0,
-    filepath >=1.0 && <2.0,
-    directory >=1.2 && <2.0,
     containers >=0.5 && <0.6,
-    esqueleto >=2.4 && <2.5
+    directory >=1.2 && <2.0,
+    esqueleto >=2.4 && <2.5,
+    filepath >=1.0 && <2.0,
+    monad-logger >=0.3 && <0.4,
+    mtl >=2.2 && <2.3,
+    servant-server >=0.7 && <0.8,
+    text >=1.0 && <2.0,
+    transformers >=0.4 && <1.0,
+    wai >=3.0 && <4.0,
+    warp >=3.0 && <4.0
   exposed-modules:
     Atuin.Server
     Atuin.Server.Messaging
@@ -48,7 +49,7 @@ executable atuin-server
   build-depends:       
     atuin-server,
     base >=4.7 && <4.9,
+    servant-server >=0.7 && <0.8,
+    text >=1.0 && <2.0,
     wai >=3.0 && <4.0,
-    warp >=3.0 && <4.0,
-    servant-server >=0.4 && <0.5,
-    text >=1.0 && <2.0
+    warp >=3.0 && <4.0

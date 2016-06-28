@@ -14,9 +14,9 @@ import Atuin.Server.TPut ( down, up, ls )
 import Atuin.Types
 
 import Control.Concurrent.MVar
-import Control.Monad.Trans.Either
 import qualified Data.Text as T
 import qualified Data.Map.Strict as Map
+import Network.Wai ( Application )
 import Servant
 
 type TPutAPI
@@ -26,7 +26,7 @@ type TPutAPI
   :<|> "files"
     :> Capture "path" FilePath
     :> ReqBody '[PlainText] T.Text
-    :> Post '[PlainText] ()
+    :> Post '[PlainText] NoContent
   :<|> "list"
     :> Get '[PlainText] T.Text
   :<|> "msg"
@@ -34,10 +34,10 @@ type TPutAPI
     :> Get '[PlainText] Message
   :<|> Capture "path" ComputerID
     :> ReqBody '[PlainText] Message
-    :> Post '[PlainText] ()
+    :> Post '[PlainText] NoContent
   :<|> "blockdata"
     :> ReqBody '[PlainText] Message
-    :> Post '[PlainText] ()
+    :> Post '[PlainText] NoContent
 
 -- | The readonly configuration of the server.
 data ServerConf
@@ -75,5 +75,5 @@ server conf
 -- | Block data consumer.
 --
 -- /Unimplemented:/ will crash if used.
-blockdata :: FilePath -> T.Text -> EitherT ServantErr IO ()
+blockdata :: FilePath -> T.Text -> Handler NoContent
 blockdata = error "unimplemented blockdata route" -- todo
