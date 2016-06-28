@@ -16,7 +16,6 @@ import Atuin.Types
 import Control.Concurrent.MVar
 import qualified Data.Text as T
 import qualified Data.Map.Strict as Map
-import Network.Wai ( Application )
 import Servant
 
 type TPutAPI
