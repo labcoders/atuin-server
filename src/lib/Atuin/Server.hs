@@ -11,6 +11,7 @@ module Atuin.Server
 
 import Atuin.Server.Messaging ( send, recv )
 import Atuin.Server.TPut ( down, up, ls )
+import Atuin.Server.BlockData ( down, up, ls )
 import Atuin.Types
 
 import Control.Concurrent.MVar
@@ -20,24 +21,26 @@ import Network.Wai ( Application )
 import Servant
 
 type TPutAPI
-  = "files"
+  = "files" -- Download a program (Lua).
     :> Capture "path" FilePath
     :> Get '[PlainText] T.Text
-  :<|> "files"
+  :<|> "files" -- Upload a program (Lua).
     :> Capture "path" FilePath
     :> ReqBody '[PlainText] T.Text
-    :> Post '[PlainText] NoContent
-  :<|> "list"
+    :> Post '[PlainText] ()
+  :<|> "list" -- Lists all available programs.
     :> Get '[PlainText] T.Text
-  :<|> "msg"
+  :<|> "msg" -- Used to retrieve messages for a given ID.
     :> Capture "path" ComputerID
     :> Get '[PlainText] Message
-  :<|> Capture "path" ComputerID
+  :<|> Capture "path" ComputerID -- Records a message for a given ID.
     :> ReqBody '[PlainText] Message
-    :> Post '[PlainText] NoContent
-  :<|> "blockdata"
+    :> Post '[PlainText] ()
+  :<|> "blockdata" -- Accepts JSON blobs for world state.
     :> ReqBody '[PlainText] Message
-    :> Post '[PlainText] NoContent
+    :> Post '[PlainText] ()
+  :<|> "world" -- Gets the world in JSON format.
+    :> Get '[PlainText] T.Text
 
 -- | The readonly configuration of the server.
 data ServerConf
@@ -55,7 +58,7 @@ makeDefaultServerConf = do
   pure ServerConf
     { basedir = "data"
     , messages = m
-    , worlddir = "world"
+    , worlddb = "atuin"
     }
 
 -- | A convenient way to write @Proxy TPutAPI@.
