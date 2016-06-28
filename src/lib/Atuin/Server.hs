@@ -11,7 +11,6 @@ module Atuin.Server
 
 import Atuin.Server.Messaging ( send, recv )
 import Atuin.Server.TPut ( down, up, ls )
-import Atuin.Server.BlockData ( down, up, ls )
 import Atuin.Types
 
 import Control.Concurrent.MVar
@@ -27,7 +26,7 @@ type TPutAPI
   :<|> "files" -- Upload a program (Lua).
     :> Capture "path" FilePath
     :> ReqBody '[PlainText] T.Text
-    :> Post '[PlainText] ()
+    :> Post '[PlainText] NoContent
   :<|> "list" -- Lists all available programs.
     :> Get '[PlainText] T.Text
   :<|> "msg" -- Used to retrieve messages for a given ID.
@@ -35,10 +34,10 @@ type TPutAPI
     :> Get '[PlainText] Message
   :<|> Capture "path" ComputerID -- Records a message for a given ID.
     :> ReqBody '[PlainText] Message
-    :> Post '[PlainText] ()
+    :> Post '[PlainText] NoContent
   :<|> "blockdata" -- Accepts JSON blobs for world state.
     :> ReqBody '[PlainText] Message
-    :> Post '[PlainText] ()
+    :> Post '[PlainText] NoContent
   :<|> "world" -- Gets the world in JSON format.
     :> Get '[PlainText] T.Text
 
@@ -47,7 +46,7 @@ data ServerConf
   = ServerConf
     { basedir :: FilePath
     , messages :: MVar (Map.Map ComputerID [Message])
-    , worlddir :: FilePath
+    , worlddb :: FilePath
     }
 
 -- | Create the default server configuration. Requires @IO@ so that we can
@@ -73,10 +72,15 @@ server conf
     :<|> ls (basedir conf)
     :<|> recv (messages conf)
     :<|> send (messages conf)
-    :<|> blockdata (worlddir conf)
+    :<|> blockdata (worlddb conf)
+    :<|> world (worlddb conf)
+
 
 -- | Block data consumer.
 --
 -- /Unimplemented:/ will crash if used.
 blockdata :: FilePath -> T.Text -> Handler NoContent
 blockdata = error "unimplemented blockdata route" -- todo
+
+world :: FilePath -> Handler T.Text
+world = error "unimplemented world route" -- todo
