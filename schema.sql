@@ -21,20 +21,21 @@ CREATE TABLE Object (
 
 CREATE TABLE Block (
     id SERIAL PRIMARY KEY,
-    x INTEGER NOT NULL,
-    y INTEGER NOT NULL,
-    z INTEGER NOT NULL,
+    block_x INTEGER NOT NULL,
+    block_y INTEGER NOT NULL,
+    block_z INTEGER NOT NULL,
     chunk_id SERIAL REFERENCES Chunk(id) NOT NULL,
     object_id INTEGER REFERENCES Object(id),
-    UNIQUE (x, y, z)
+    UNIQUE (block_x, block_y, block_z)
 );
 
 CREATE TABLE BlockData (
-    id INTEGER PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     block_id SERIAL REFERENCES Block(id),
-    modname TEXT,
-    blockname TEXT,
-    data TEXT
+    mod_name TEXT,
+    block_name TEXT,
+    block_data TEXT,
+    UNIQUE (block_id)
 );
 
 COMMIT;
