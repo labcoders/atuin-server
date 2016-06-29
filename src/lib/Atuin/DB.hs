@@ -8,7 +8,6 @@ module Atuin.Server.BlockData where
 
 import Control.Monad.Trans.Either
 
-import Database.Esqueleto
 import Database.Persist
 
 import qualified Data.Map.Strict as Map
