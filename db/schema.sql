@@ -1,10 +1,10 @@
 BEGIN;
-DROP TABLE IF EXISTS BlockData;
-DROP TABLE IF EXISTS Block;
-DROP TABLE IF EXISTS Object;
-DROP TABLE IF EXISTS Chunk;
+DROP TABLE IF EXISTS block_data;
+DROP TABLE IF EXISTS block;
+DROP TABLE IF EXISTS object;
+DROP TABLE IF EXISTS chunk;
 
-CREATE TABLE Chunk (
+CREATE TABLE chunk (
     id SERIAL PRIMARY KEY,
     chunk_x INTEGER NOT NULL,
     chunk_y INTEGER NOT NULL,
@@ -13,25 +13,25 @@ CREATE TABLE Chunk (
     UNIQUE (chunk_x, chunk_y, chunk_z)
 );
 
-CREATE TABLE Object (
+CREATE TABLE object (
     id SERIAL PRIMARY KEY,
-    chunk_id INTEGER REFERENCES Chunk(id) NOT NULL,
+    chunk_id INTEGER REFERENCES chunk(id) NOT NULL,
     object_name TEXT
 );
 
-CREATE TABLE Block (
+CREATE TABLE block (
     id SERIAL PRIMARY KEY,
     block_x INTEGER NOT NULL,
     block_y INTEGER NOT NULL,
     block_z INTEGER NOT NULL,
-    chunk_id SERIAL REFERENCES Chunk(id) NOT NULL,
-    object_id INTEGER REFERENCES Object(id),
+    chunk_id SERIAL REFERENCES chunk(id) NOT NULL,
+    object_id INTEGER REFERENCES object(id),
     UNIQUE (block_x, block_y, block_z)
 );
 
-CREATE TABLE BlockData (
+CREATE TABLE block_data (
     id SERIAL PRIMARY KEY,
-    block_id SERIAL REFERENCES Block(id),
+    block_id SERIAL REFERENCES block(id),
     mod_name TEXT,
     block_name TEXT,
     block_data TEXT,
