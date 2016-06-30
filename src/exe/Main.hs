@@ -7,6 +7,7 @@ import Atuin.Server
 import Data.List ( intercalate )
 import Network.Wai ( Application )
 import Network.Wai.Handler.Warp
+import Network.Wai.Logger (withStdoutLogger)
 import Servant
 import System.Environment ( getArgs, getProgName )
 import System.Exit ( exitFailure )
@@ -26,6 +27,7 @@ main = do
         else do
             let p = head args
             putStrLn $ concat [ "Running on port 8080 from ", p, "..." ]
-            let settings = setPort 8080 $ setHost "127.0.0.1" defaultSettings
-            conf <- makeDefaultServerConf
-            runSettings settings $ app conf { basedir = p }
+            withStdoutLogger $ \aplogger -> do
+              let settings = setPort 8080 $ setHost "127.0.0.1" $ setLogger aplogger defaultSettings
+              conf <- makeDefaultServerConf
+              runSettings settings $ app conf { basedir = p }

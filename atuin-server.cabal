@@ -52,4 +52,5 @@ executable atuin-server
     servant-server >=0.7 && <0.8,
     text >=1.0 && <2.0,
     wai >=3.0 && <4.0,
+    wai-logger >=2.2 && <2.3,
     warp >=3.0 && <4.0
