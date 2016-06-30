@@ -28,7 +28,7 @@ library
     monad-logger >=0.3 && <0.4,
     mtl >=2.2 && <2.3,
     servant-server >=0.7 && <0.8,
-    persistent >=2.5 && <2.6,
+    persistent >=2.2 && <2.6,
     text >=1.0 && <2.0,
     transformers >=0.4 && <1.0,
     wai >=3.0 && <4.0,
