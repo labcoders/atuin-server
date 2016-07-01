@@ -1,6 +1,8 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
 
 module Atuin.Server
 ( ServerConf(..)
@@ -9,14 +11,20 @@ module Atuin.Server
 , tputAPI
 ) where
 
+import Atuin.Planner.Types ( JobReq )
 import qualified Atuin.Server.DB as DB
 import Atuin.Server.Messaging ( send, recv )
 import Atuin.Server.TPut ( down, up, ls )
 import Atuin.Types
 
+import Control.Concurrent.Chan
 import Control.Concurrent.MVar
+import Control.Monad.IO.Class
+import Data.Aeson
 import qualified Data.Text as T
+import qualified Data.Text.IO as T
 import qualified Data.Map.Strict as Map
+import GHC.Generics
 import Servant
 
 type TPutAPI
@@ -30,20 +38,24 @@ type TPutAPI
   :<|> "list" -- Lists all available programs.
     :> Get '[PlainText] T.Text
   :<|> "msg" -- Used to retrieve messages for a given ID.
-    :> Capture "path" ComputerID
+    :> Capture "path" SomeDeviceID
     :> Get '[PlainText] Message
-  :<|> Capture "path" ComputerID -- Records a message for a given ID.
+  :<|> Capture "path" SomeDeviceID -- Records a message for a given ID.
     :> ReqBody '[PlainText] Message
     :> Post '[PlainText] NoContent
   :<|> "blockdata" -- Accepts JSON blobs for world state.
     :> ReqBody '[JSON] BlockData
     :> Post '[JSON] NoContent
+  :<|> "test"
+    :> ReqBody '[JSON] TestData
+    :> Post '[JSON] TestData
 
 -- | The readonly configuration of the server.
 data ServerConf
   = ServerConf
     { basedir :: FilePath
-    , messages :: MVar (Map.Map ComputerID [Message])
+    , messages :: MVar (Map.Map SomeDeviceID [Message])
+    , plannerPipe :: Chan JobReq
     }
 
 -- | Create the default server configuration. Requires @IO@ so that we can
@@ -51,9 +63,11 @@ data ServerConf
 makeDefaultServerConf :: IO ServerConf
 makeDefaultServerConf = do
   m <- newMVar Map.empty
+  chan <- newChan
   pure ServerConf
     { basedir = "data"
     , messages = m
+    , plannerPipe = chan
     }
 
 -- | A convenient way to write @Proxy TPutAPI@.
@@ -69,3 +83,15 @@ server conf
     :<|> recv (messages conf)
     :<|> send (messages conf)
     :<|> DB.blockdata
+    :<|> stdinBlockingEndpoint (plannerPipe conf)
+
+data TestData
+  = TestData
+    { sampleString :: T.Text
+    }
+  deriving (Eq, Generic, Ord, Show, ToJSON, FromJSON)
+
+stdinBlockingEndpoint :: Chan JobReq -> TestData -> Handler TestData
+stdinBlockingEndpoint _ (TestData s) = liftIO $ do
+  putStrLn "blocking test"
+  TestData <$> (T.append s <$> T.getLine)

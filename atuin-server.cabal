@@ -30,13 +30,14 @@ library
     mtl >=2.2 && <2.3,
     servant-server >=0.7 && <0.8,
     persistent >=2.2 && <2.6,
-    persistent-template >=2.5 && <2.6,
-    persistent-postgresql >=2.5 && <2.6,
+    persistent-template >=2.1 && <2.6,
+    persistent-postgresql >=2.2 && <2.6,
     resource-pool >=0.2 && <0.3,
     text >=1.0 && <2.0,
     transformers >=0.4 && <1.0,
     wai >=3.0 && <4.0,
-    warp >=3.0 && <4.0
+    warp >=3.0 && <4.0,
+    http-api-data >=0.2 && <0.3
   exposed-modules:
     Atuin.Server
     Atuin.Server.DB

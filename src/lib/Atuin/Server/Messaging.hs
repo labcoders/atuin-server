@@ -3,6 +3,7 @@
  -}
 
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes #-}
 
 module Atuin.Server.Messaging where
 
@@ -16,12 +17,12 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
 import Servant
 
--- | Poll for a message on the queue identified with a given 'ComputerID'.
+-- | Poll for a message on the queue identified with a given 'DeviceID'.
 recv
   -- | Shared in-memory database of messages
-  :: MVar (Map.Map ComputerID [Message])
+  :: MVar (Map.Map SomeDeviceID [Message])
   -- | Name of the queue to read from
-  -> ComputerID
+  -> SomeDeviceID
   -> Handler Message
 recv mv cid = do
   msgs <- liftIO $ takeMVar mv
@@ -31,23 +32,23 @@ recv mv cid = do
       (x:_) -> do
           let newMsgs = Map.adjust tail cid msgs
           liftIO $ putMVar mv newMsgs
-          liftIO $ putStrLn $ T.unpack cid ++ " -> # = " ++ T.unpack x
+          liftIO $ putStrLn $ T.unpack (someDeviceID cid) ++ " -> # = " ++ T.unpack x
           return x
     Nothing -> liftIO $ do
-      putStrLn $ "no messages for " ++ show cid
+      putStrLn $ "no messages for " ++ show (someDeviceID cid)
       putMVar mv msgs >> return ""
 
--- | Record a message destinted for a given 'ComputerID'.
+-- | Record a message destinted for a given 'DeviceID'.
 send
   -- | Shared in-memory database of messages
-  :: MVar (Map.Map ComputerID [Message])
+  :: MVar (Map.Map SomeDeviceID [Message])
   -- | Name of the queue to write to
-  -> ComputerID
+  -> SomeDeviceID
   -- | Message to record
   -> Message
   -> Handler NoContent
 send mv cid msg = do
-    liftIO $ putStrLn $ "# -> " ++ T.unpack cid ++ " = " ++ T.unpack msg
+    liftIO $ putStrLn $ "# -> " ++ T.unpack (someDeviceID cid) ++ " = " ++ T.unpack msg
     msgs <- liftIO $ takeMVar mv
     liftIO $ putMVar mv $ case Map.lookup cid msgs of
         Nothing -> Map.insert cid [msg] msgs

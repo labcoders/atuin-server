@@ -1,27 +1,28 @@
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DeriveAnyClass #-}
 
 {-|
  - Description: Atuin internal types
  -}
+
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 module Atuin.Types where
 
 import Data.Aeson
 import Data.Int (Int32)
 import qualified Data.Text as T
+import Web.HttpApiData ( FromHttpApiData(..), ToHttpApiData )
 
 import GHC.Generics
 
 -- | Messages are opaque strings. We do not require messages to adhere to any
 -- particular format.
 type Message
-  = T.Text
-
--- | Although these will usually be computer IDs, which are numbers, we will
--- treat them as strings, since it is not inconceivable that we would like to
--- use human readable names such as @"lava-pump"@ as a destination.
-type ComputerID
   = T.Text
 
 data Block
@@ -46,3 +47,33 @@ data BlockData
 
 instance FromJSON Block
 instance FromJSON BlockData
+
+data Device
+  = Computer
+  | Turtle
+
+-- | A device ID with a type-level tag specifying which device it's for.
+newtype DeviceID (a :: Device)
+  = DeviceID T.Text
+  deriving (Eq, Ord, Generic, FromJSON, ToJSON, FromHttpApiData, ToHttpApiData)
+
+data SomeDeviceID
+  = forall a. SomeDeviceID (DeviceID a)
+
+instance FromHttpApiData SomeDeviceID where
+  parseUrlPiece = pure . SomeDeviceID . DeviceID
+
+someDeviceID :: SomeDeviceID -> T.Text
+someDeviceID (SomeDeviceID (DeviceID did)) = did
+
+computerID :: T.Text -> DeviceID 'Computer
+computerID = DeviceID
+
+turtleID :: T.Text -> DeviceID 'Turtle
+turtleID = DeviceID
+
+instance Eq SomeDeviceID where
+  SomeDeviceID (DeviceID x) == SomeDeviceID (DeviceID y) = x == y
+
+instance Ord SomeDeviceID where
+  SomeDeviceID (DeviceID x) `compare` SomeDeviceID (DeviceID y) = compare x y
