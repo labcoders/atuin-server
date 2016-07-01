@@ -9,6 +9,7 @@ module Atuin.Server
 , tputAPI
 ) where
 
+import qualified Atuin.Server.DB as DB
 import Atuin.Server.Messaging ( send, recv )
 import Atuin.Server.TPut ( down, up, ls )
 import Atuin.Types
@@ -35,17 +36,14 @@ type TPutAPI
     :> ReqBody '[PlainText] Message
     :> Post '[PlainText] NoContent
   :<|> "blockdata" -- Accepts JSON blobs for world state.
-    :> ReqBody '[PlainText] Message
-    :> Post '[PlainText] NoContent
-  :<|> "world" -- Gets the world in JSON format.
-    :> Get '[PlainText] T.Text
+    :> ReqBody '[JSON] BlockData
+    :> Post '[JSON] NoContent
 
 -- | The readonly configuration of the server.
 data ServerConf
   = ServerConf
     { basedir :: FilePath
     , messages :: MVar (Map.Map ComputerID [Message])
-    , worlddb :: FilePath
     }
 
 -- | Create the default server configuration. Requires @IO@ so that we can
@@ -56,7 +54,6 @@ makeDefaultServerConf = do
   pure ServerConf
     { basedir = "data"
     , messages = m
-    , worlddb = "atuin"
     }
 
 -- | A convenient way to write @Proxy TPutAPI@.
@@ -71,15 +68,4 @@ server conf
     :<|> ls (basedir conf)
     :<|> recv (messages conf)
     :<|> send (messages conf)
-    :<|> blockdata (worlddb conf)
-    :<|> world (worlddb conf)
-
-
--- | Block data consumer.
---
--- /Unimplemented:/ will crash if used.
-blockdata :: FilePath -> T.Text -> Handler NoContent
-blockdata = error "unimplemented blockdata route" -- todo
-
-world :: FilePath -> Handler T.Text
-world = error "unimplemented world route" -- todo
+    :<|> DB.blockdata

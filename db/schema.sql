@@ -1,3 +1,4 @@
+/*
 BEGIN;
 DROP TABLE IF EXISTS block_data;
 DROP TABLE IF EXISTS block;
@@ -9,14 +10,14 @@ CREATE TABLE chunk (
     chunk_x INTEGER NOT NULL,
     chunk_y INTEGER NOT NULL,
     chunk_z INTEGER NOT NULL,
-    type TEXT,
+    chunk_type TEXT NOT NULL,
     UNIQUE (chunk_x, chunk_y, chunk_z)
 );
 
 CREATE TABLE object (
     id SERIAL PRIMARY KEY,
     chunk_id INTEGER REFERENCES chunk(id) NOT NULL,
-    object_name TEXT
+    object_name TEXT NOT NULL
 );
 
 CREATE TABLE block (
@@ -39,3 +40,4 @@ CREATE TABLE block_data (
 );
 
 COMMIT;
+*/
