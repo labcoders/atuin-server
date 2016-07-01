@@ -11,7 +11,8 @@ module Atuin.Server
 , tputAPI
 ) where
 
-import Atuin.Planner.Types ( JobReq )
+import Atuin.Lua
+import Atuin.Planner.Types ( JobReq(..) )
 import qualified Atuin.Server.DB as DB
 import Atuin.Server.Messaging ( send, recv )
 import Atuin.Server.TPut ( down, up, ls )
@@ -21,11 +22,8 @@ import Control.Concurrent.Chan
 import Control.Concurrent.MVar
 import Control.Monad.IO.Class
 import Control.Monad.Logger ( runStderrLoggingT )
-import Data.Aeson
 import qualified Data.Text as T
-import qualified Data.Text.IO as T
 import qualified Data.Map.Strict as Map
-import GHC.Generics
 import Servant
 
 type TPutAPI
@@ -47,9 +45,9 @@ type TPutAPI
   :<|> "blockdata" -- Accepts JSON blobs for world state.
     :> ReqBody '[JSON] BlockData
     :> Post '[JSON] NoContent
-  :<|> "test"
-    :> ReqBody '[JSON] TestData
-    :> Post '[JSON] TestData
+  :<|> "idle"
+    :> Capture "computerid" SomeDeviceID
+    :> Post '[JSON] LuaText
 
 -- | The readonly configuration of the server.
 data ServerConf
@@ -84,18 +82,16 @@ server conf
     :<|> recv (messages conf)
     :<|> send (messages conf)
     :<|> blockdata
-    :<|> stdinBlockingEndpoint (plannerPipe conf)
+    :<|> idle (plannerPipe conf)
 
-data TestData
-  = TestData
-    { sampleString :: T.Text
+idle :: Chan JobReq -> SomeDeviceID -> Handler LuaText
+idle chan cid = liftIO $ do
+  responseM <- newEmptyMVar
+  writeChan chan JobReq
+    { jobReqTurtleId = turtleID $ someDeviceID cid
+    , jobReqResponse = responseM
     }
-  deriving (Eq, Generic, Ord, Show, ToJSON, FromJSON)
-
-stdinBlockingEndpoint :: Chan JobReq -> TestData -> Handler TestData
-stdinBlockingEndpoint _ (TestData s) = liftIO $ do
-  putStrLn "blocking test"
-  TestData <$> (T.append s <$> T.getLine)
+  takeMVar responseM
 
 -- | Block data consumer.
 blockdata :: BlockData -> Handler NoContent

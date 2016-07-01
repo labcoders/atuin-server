@@ -39,14 +39,14 @@ library
     warp >=3.0 && <4.0,
     http-api-data >=0.2 && <0.3
   exposed-modules:
+    Atuin.Planner
     Atuin.Server
     Atuin.Server.DB
     Atuin.Server.Messaging
     Atuin.Server.TPut
     Atuin.Types
-
-  other-modules:       
-  -- other-extensions:    
+  other-modules:
+    Atuin.Planner.Types
 
 executable atuin-server
   hs-source-dirs:      src/exe

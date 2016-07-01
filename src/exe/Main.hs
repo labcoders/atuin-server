@@ -2,8 +2,11 @@
 
 module Main where
 
+import Atuin.Planner
 import Atuin.Server
 
+import Control.Concurrent ( forkIO )
+import Control.Monad ( void )
 import Data.List ( intercalate )
 import Network.Wai ( Application )
 import Network.Wai.Handler.Warp
@@ -30,4 +33,9 @@ main = do
             withStdoutLogger $ \aplogger -> do
               let settings = setPort 8080 $ setHost "127.0.0.1" $ setLogger aplogger defaultSettings
               conf <- makeDefaultServerConf
-              runSettings settings $ app conf { basedir = p }
+              go settings (conf { basedir = p})
+
+go :: Settings -> ServerConf -> IO ()
+go settings conf = do
+  void $ forkIO $ planner (plannerPipe conf)
+  runSettings settings $ app conf
