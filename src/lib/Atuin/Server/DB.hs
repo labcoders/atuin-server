@@ -16,8 +16,8 @@ module Atuin.Server.DB where
 
 import qualified Atuin.Types as A
 
+import Control.Monad.Logger (runStderrLoggingT)
 import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Logger   (runStderrLoggingT)
 
 import Data.Int (Int32)
 
@@ -28,8 +28,6 @@ import Database.Persist.TH
 import Data.Pool
 
 import qualified Data.Text as T
-
-import Servant
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 Chunk
@@ -71,12 +69,6 @@ toChunkCoords x y z = (x `div` 8, y `div` 8, z `div` 8)
 
 blkDataToList :: A.BlockData -> [A.Block]
 blkDataToList bd = (A.block1 bd : A.block2 bd : A.block3 bd : [])
-
--- | Block data consumer.
-blockdata :: A.BlockData -> Handler NoContent
-blockdata bd = do
-  mapM_ (runStderrLoggingT . insertRecvBlockData) (blkDataToList bd)
-  return NoContent
 
 -- | Construct and migrate all tables.
 buildDb :: IO ()

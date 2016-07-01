@@ -20,6 +20,7 @@ import Atuin.Types
 import Control.Concurrent.Chan
 import Control.Concurrent.MVar
 import Control.Monad.IO.Class
+import Control.Monad.Logger ( runStderrLoggingT )
 import Data.Aeson
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
@@ -82,7 +83,7 @@ server conf
     :<|> ls (basedir conf)
     :<|> recv (messages conf)
     :<|> send (messages conf)
-    :<|> DB.blockdata
+    :<|> blockdata
     :<|> stdinBlockingEndpoint (plannerPipe conf)
 
 data TestData
@@ -95,3 +96,9 @@ stdinBlockingEndpoint :: Chan JobReq -> TestData -> Handler TestData
 stdinBlockingEndpoint _ (TestData s) = liftIO $ do
   putStrLn "blocking test"
   TestData <$> (T.append s <$> T.getLine)
+
+-- | Block data consumer.
+blockdata :: BlockData -> Handler NoContent
+blockdata bd = do
+  mapM_ (runStderrLoggingT . DB.insertRecvBlockData) (DB.blkDataToList bd)
+  return NoContent
