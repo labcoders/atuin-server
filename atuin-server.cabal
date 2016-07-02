@@ -37,9 +37,14 @@ library
     transformers >=0.4 && <1.0,
     wai >=3.0 && <4.0,
     warp >=3.0 && <4.0,
-    http-api-data >=0.2 && <0.3
+    http-api-data >=0.2 && <0.3,
+    free >=4.12 && <4.13,
+    recursion-schemes >=4.1 && <4.2,
+    ansi-wl-pprint >=0.6 && <0.7
   exposed-modules:
     Atuin.Planner
+    Atuin.Lua
+    Atuin.Lua.Pretty
     Atuin.Server
     Atuin.Server.DB
     Atuin.Server.Messaging
