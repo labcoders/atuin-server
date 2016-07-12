@@ -1,4 +1,3 @@
-
 {-|
  - Description: Atuin internal types
  -}
