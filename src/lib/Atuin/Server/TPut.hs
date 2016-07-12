@@ -23,7 +23,6 @@ down
   -> FilePath -- ^ The path/name of the file the download.
   -> Handler T.Text
 down db path = do
-    liftIO $ putStrLn "download"
     text <- liftIO $ (readFile (db </> path) >>= return . Just) `catch` handle
     case text of
         Nothing -> throwError err404
@@ -38,7 +37,6 @@ up
   -> T.Text -- ^ The file contents.
   -> Handler NoContent
 up db path content = liftIO $ do
-    putStrLn "upload"
     writeFile (db </> path) content
     pure NoContent
 
@@ -47,7 +45,6 @@ ls
   :: FilePath -- ^ The directory in which files live.
   -> Handler T.Text
 ls db = do
-    liftIO $ putStrLn "list"
     -- ignore all files beginning with '.'
     files <- liftIO $ sort . filter (\(c:_) -> c /= '.') <$> getDirectoryContents db
     pure $ T.pack $ unlines files

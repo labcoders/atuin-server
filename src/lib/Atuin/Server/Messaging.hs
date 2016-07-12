@@ -35,7 +35,6 @@ recv mv cid = do
           liftIO $ putStrLn $ T.unpack (someDeviceID cid) ++ " -> # = " ++ T.unpack x
           return x
     Nothing -> liftIO $ do
-      putStrLn $ "no messages for " ++ show (someDeviceID cid)
       putMVar mv msgs >> return ""
 
 -- | Record a message destinted for a given 'DeviceID'.
