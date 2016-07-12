@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Main where
+module Main
+( main
+) where
 
 import Atuin.Planner
 import Atuin.Server
