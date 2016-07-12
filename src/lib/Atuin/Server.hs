@@ -39,7 +39,8 @@ type TPutAPI
   :<|> "msg" -- Used to retrieve messages for a given ID.
     :> Capture "path" SomeDeviceID
     :> Get '[PlainText] Message
-  :<|> Capture "path" SomeDeviceID -- Records a message for a given ID.
+  :<|> "msg"
+    :> Capture "path" SomeDeviceID -- Records a message for a given ID.
     :> ReqBody '[PlainText] Message
     :> Post '[PlainText] NoContent
   :<|> "blockdata" -- Accepts JSON blobs for world state.
